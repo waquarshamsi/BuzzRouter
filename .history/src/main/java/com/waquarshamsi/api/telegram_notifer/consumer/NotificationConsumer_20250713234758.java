@@ -1,0 +1,30 @@
+package com.waquarshamsi.api.telegram_notifer.consumer;
+
+import com.waquarshamsi.api.telegram_notifer.dto.NotificationRequest;
+import com.waquarshamsi.api.telegram_notifer.service.NotificationDispatcher;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Service;
+
+@Service
+public class NotificationConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(NotificationConsumer.class);
+    private final NotificationDispatcher notificationDispatcher;
+
+    public NotificationConsumer(NotificationDispatcher notificationDispatcher) {
+        this.notificationDispatcher = notificationDispatcher;
+    }
+
+    @RabbitListener(queues = "${app.rabbitmq.queue}")
+    public void receiveNotification(@Valid NotificationRequest request) {
+        log.info("Received notification request: {}", request);
+        try {
+            notificationDispatcher.dispatch(request);
+        } catch (Exception e) {
+            log.error("Error processing notification request: {}", request, e);
+        }
+    }
+}
