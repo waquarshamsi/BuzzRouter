@@ -7,6 +7,7 @@ import com.waquarshamsi.api.telegram_notifer.service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -29,6 +30,7 @@ public class EmailNotificationService implements NotificationService {
     }
 
     @Override
+    @CircuitBreaker(name = "email-service", fallbackMethod = "fallback")
     @Retryable(
             value = {MailException.class},
             maxAttempts = 3,
@@ -55,5 +57,11 @@ public class EmailNotificationService implements NotificationService {
     public void recover(MailException e, NotificationRequest request, String recipientIdentifier) {
         log.error("All retries failed for sending email to: {}. Final error: {}", recipientIdentifier, e.getMessage());
         throw new NotificationSendingException("Failed to send email after multiple retries", e);
+    }
+
+    // Fallback method for the Circuit Breaker
+    private void fallback(NotificationRequest request, String recipientIdentifier, Exception e) {
+        log.warn("Circuit breaker for email-service is open. Failing fast for recipient: {}. Error: {}", recipientIdentifier, e.getMessage());
+        throw new NotificationSendingException("Circuit breaker open for email service. Not retrying.", e);
     }
 }

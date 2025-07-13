@@ -7,6 +7,7 @@ import com.waquarshamsi.api.telegram_notifer.service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class TelegramNotificationService implements NotificationService {
     }
 
     @Override
+    @CircuitBreaker(name = "telegram-service", fallbackMethod = "fallback")
     @Retryable(
             value = {TelegramApiException.class},
             maxAttempts = 3,
@@ -55,5 +57,11 @@ public class TelegramNotificationService implements NotificationService {
     public void recover(RuntimeException e, NotificationRequest request, String recipientIdentifier) {
         log.error("All retries failed for sending Telegram message to chat ID: {}. Final error: {}", recipientIdentifier, e.getMessage());
         throw new NotificationSendingException("Failed to send Telegram message after multiple retries", e);
+    }
+
+    // Fallback method for the Circuit Breaker
+    private void fallback(NotificationRequest request, String recipientIdentifier, Exception e) {
+        log.warn("Circuit breaker for telegram-service is open. Failing fast for chat ID: {}. Error: {}", recipientIdentifier, e.getMessage());
+        throw new NotificationSendingException("Circuit breaker open for Telegram service. Not retrying.", e);
     }
 }

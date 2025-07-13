@@ -1,0 +1,72 @@
+{"properties": [
+  {
+    "name": "app.rabbitmq.exchange",
+    "type": "java.lang.String",
+    "description": "A description for 'app.rabbitmq.exchange'"
+  },
+  {
+    "name": "twilio.from-number",
+    "type": "java.lang.String",
+    "description": "A description for 'twilio.from-number'"
+  },
+  {
+    "name": "twilio.auth-token",
+    "type": "java.lang.String",
+    "description": "A description for 'twilio.auth-token'"
+  },
+  {
+    "name": "feature-flags.sms.enabled",
+    "type": "java.lang.String",
+    "description": "A description for 'feature-flags.sms.enabled'"
+  },
+  {
+    "name": "twilio.account-sid",
+    "type": "java.lang.String",
+    "description": "A description for 'twilio.account-sid'"
+  },
+  {
+    "name": "telegram.bot.token",
+    "type": "java.lang.String",
+    "description": "A description for 'telegram.bot.token'"
+  },
+  {
+    "name": "app.mail.from",
+    "type": "java.lang.String",
+    "description": "A description for 'app.mail.from'"
+  },
+  {
+    "name": "app.rabbitmq.dlq-routing-key",
+    "type": "java.lang.String",
+    "description": "A description for 'app.rabbitmq.dlq-routing-key'"
+  },
+  {
+    "name": "app.rabbitmq.dlq",
+    "type": "java.lang.String",
+    "description": "A description for 'app.rabbitmq.dlq'"
+  },
+  {
+    "name": "app.rabbitmq.dlx",
+    "type": "java.lang.String",
+    "description": "A description for 'app.rabbitmq.dlx'"
+  },
+  {
+    "name": "app.rabbitmq.routing-key",
+    "type": "java.lang.String",
+    "description": "A description for 'app.rabbitmq.routing-key'"
+  },
+  {
+    "name": "app.rabbitmq.queue",
+    "type": "java.lang.String",
+    "description": "A description for 'app.rabbitmq.queue'"
+  },
+  {
+    "name": "logstash.port",
+    "type": "java.lang.String",
+    "description": "A description for 'logstash.port'"
+  },
+  { 
+    "name": "logstash.host", 
+    "type": "java.lang.String",
+    "description": "A description for 'logstash.host'"
+  }
+]}

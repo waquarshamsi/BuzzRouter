@@ -10,6 +10,7 @@ import com.waquarshamsi.api.telegram_notifer.service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
@@ -29,6 +30,7 @@ public class SmsNotificationService implements NotificationService {
     }
 
     @Override
+    @CircuitBreaker(name = "sms-service", fallbackMethod = "fallback")
     @Retryable(
             value = {ApiException.class},
             maxAttempts = 3,
@@ -53,5 +55,11 @@ public class SmsNotificationService implements NotificationService {
     public void recover(ApiException e, NotificationRequest request, String recipientIdentifier) {
         log.error("All retries failed for sending SMS to: {}. Final error: {}", recipientIdentifier, e.getMessage());
         throw new NotificationSendingException("Failed to send SMS after multiple retries", e);
+    }
+
+    // Fallback method for the Circuit Breaker
+    private void fallback(NotificationRequest request, String recipientIdentifier, Exception e) {
+        log.warn("Circuit breaker for sms-service is open. Failing fast for recipient: {}. Error: {}", recipientIdentifier, e.getMessage());
+        throw new NotificationSendingException("Circuit breaker open for SMS service. Not retrying.", e);
     }
 }

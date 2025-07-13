@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  telegram-notifier:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: telegram-notifier
+    restart: always
+    env_file: .env
+    environment:
+      # RabbitMQ connection
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      # Logstash connection
+      - LOGSTASH_HOST=logstash
+      # Service credentials
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - SPRING_MAIL_HOST=${MAIL_HOST}
+      - SPRING_MAIL_PORT=${MAIL_PORT}
+      - SPRING_MAIL_USERNAME=${MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${MAIL_PASSWORD}
+      - APP_MAIL_FROM=${MAIL_FROM}
+      - TWILIO_ACCOUNT-SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH-TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_FROM-NUMBER=${TWILIO_FROM_NUMBER}
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      logstash:
+        condition: service_started
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq-prod
+    restart: always
+    env_file: .env
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    container_name: elasticsearch-prod
+    restart: always
+    env_file: .env
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-s", "-u", "elastic:${ELASTIC_PASSWORD}", "http://localhost:9200/_cluster/health?wait_for_status=yellow"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.14.3
+    container_name: logstash-prod
+    restart: always
+    env_file: .env
+    volumes:
+      - ./logstash/pipeline-prod:/usr/share/logstash/pipeline:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.3
+    container_name: kibana-prod
+    restart: always
+    env_file: .env
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+volumes:
+  rabbitmq_data:
+    driver: local
+  es_data:
+    driver: local
