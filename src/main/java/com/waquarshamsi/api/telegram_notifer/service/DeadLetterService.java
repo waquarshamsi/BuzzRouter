@@ -1,9 +1,11 @@
 package com.waquarshamsi.api.telegram_notifer.service;
 
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.GetResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.QueueInformation;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,8 +89,19 @@ public class DeadLetterService {
     }
 
     public long getDlqMessageCount() {
-        return Objects.requireNonNullElse(
-                rabbitTemplate.getQueueProperties(dlqName).get(RabbitTemplate.QUEUE_MESSAGE_COUNT), 0);
+        try {
+            Long count = rabbitTemplate.execute(channel -> {
+                AMQP.Queue.DeclareOk declareOk = channel.queueDeclarePassive(dlqName);
+                return (long) declareOk.getMessageCount();
+            });
+            return Objects.requireNonNullElse(count, 0L);
+        } catch (AmqpException e) {
+            // This is an expected scenario if the queue doesn't exist yet, so we log at a lower level.
+            if (log.isTraceEnabled()) {
+                log.trace("Could not get message count for DLQ '{}', it may not exist yet. Cause: {}", dlqName, e.getMessage());
+            }
+            return 0L;
+        }
     }
 
     public long purgeDlq() {

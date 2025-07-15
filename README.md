@@ -105,9 +105,22 @@ This section provides an overview of the key files and directories in the projec
 
 2.  **Run the Spring Boot application**:
     You can run the application from your IDE or using the Maven wrapper:
+    To use your local configuration, you must activate the `local` profile.
+
+    **On Windows (in CMD or PowerShell):**
+    ```shell
+    mvnw spring-boot:run -Dspring-boot.run.profiles=local
+    ```
+
+    **On Linux or macOS:**
     ```bash
     ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
     ```
+
+    > **Note:** If your shell has trouble with the command above, you can try this more robust alternative which works on all platforms:
+    > ```shell
+    > mvnw spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=local"
+    > ```
 
 The application will now be running and connected to the services in Docker.
 

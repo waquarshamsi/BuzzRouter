@@ -1,6 +1,7 @@
 package com.waquarshamsi.api.telegram_notifer.service;
 
 import com.waquarshamsi.api.telegram_notifer.dto.NotificationRequest;
+import com.waquarshamsi.api.telegram_notifer.model.NotificationTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
