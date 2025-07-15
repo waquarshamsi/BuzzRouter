@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: telegram-notifier
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: xyz@abc.com
+    password: admin
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+logging:
+  pattern:
+    console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+
+app:
+  rabbitmq:
+    exchange: notifications.exchange
+    queue: notifications.queue
+    routing-key: notifications.routing-key
+    dlx: notifications.dlx
+    dlq: notifications.dlq
+    dlq-routing-key: dead-letter
+  mail:
+    from: noreply@your-service.com
+telegram:
+  bot:
+    token: xxxx
+twilio:
+  account-sid: ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  auth-token: YOUR_TWILIO_AUTH_TOKEN
+  from-number: +15005550006 # A valid Twilio phone number you own
+feature-flags:
+  sms:
+    enabled: false # Set to false to disable SMS notifications
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+info:
+  app:
+    description: ${project.description} # From pom.xml
+    version: ${project.version}       # From pom.xml
+  contact:
+    email: dev-team@example.com
+logstash:
+  host: localhost
+  port: 5000
