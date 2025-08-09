@@ -31,15 +31,14 @@ public class NotificationDispatcher {
                 return; // Skips this target and continues to the next
             }
 
-            notificationServices.stream().filter(service -> service.supports(target)).findFirst().ifPresentOrElse(
+            notificationServices.stream().filter(service -> service.supports(target)).forEach(
                     service -> {
                         log.debug("Found service {} for target {}. Sending to {}",
                                 service.getClass().getSimpleName(),
                                 target, recipientIdentifier);
                         service.send(request, recipientIdentifier);
-                    },
-                    () -> log.warn("No notification service found for target: {}", target)
-            );
+                    });
+//  how to print this log () -> log.warn("No notification service found for target: {}", target)
         });
     }
 }

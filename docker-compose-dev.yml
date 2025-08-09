@@ -1,0 +1,29 @@
+# Use a recent version of the Docker Compose file format
+version: '3.8'
+
+services:
+  # Define the service for your Spring Boot application
+  telegram-notifier:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: telegram-notifier
+    restart: always
+    env_file: .env.local
+    environment:
+      # RabbitMQ connection
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      # Logstash connection
+      - LOGSTASH_HOST=logstash
+      # Service credentials
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - SPRING_MAIL_HOST=${MAIL_HOST}
+      - SPRING_MAIL_PORT=${MAIL_PORT}
+      - SPRING_MAIL_USERNAME=${MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${MAIL_PASSWORD}
+      - APP_MAIL_FROM=${MAIL_FROM}
+      - TWILIO_ACCOUNT-SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH-TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_FROM-NUMBER=${TWILIO_FROM_NUMBER}

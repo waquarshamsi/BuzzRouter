@@ -3,7 +3,9 @@ package com.waquarshamsi.api.telegram_notifer.service.impl;
 import com.waquarshamsi.api.telegram_notifer.dto.NotificationRequest;
 import com.waquarshamsi.api.telegram_notifer.exception.NotificationSendingException;
 import com.waquarshamsi.api.telegram_notifer.model.NotificationTarget;
+import com.waquarshamsi.api.telegram_notifer.service.FeatureFlagService;
 import com.waquarshamsi.api.telegram_notifer.service.NotificationService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,11 +22,14 @@ import org.springframework.stereotype.Service;
 public class EmailNotificationService implements NotificationService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailNotificationService.class);
-
+    private final FeatureFlagService featureFlagService;
     private final JavaMailSender mailSender;
     private final String fromEmail;
 
-    public EmailNotificationService(JavaMailSender mailSender, @Value("${app.mail.from}") String fromEmail) {
+    public EmailNotificationService(FeatureFlagService featureFlagService,
+                                    JavaMailSender mailSender,
+                                    @Value("${app.mail.from}") String fromEmail) {
+        this.featureFlagService = featureFlagService;
         this.mailSender = mailSender;
         this.fromEmail = fromEmail;
     }
@@ -50,7 +55,8 @@ public class EmailNotificationService implements NotificationService {
 
     @Override
     public boolean supports(NotificationTarget target) {
-        return target == NotificationTarget.EMAIL;
+        //TODO: add a log warn if a client requested to send email, but feature is disabled
+        return featureFlagService.isEmailNotificationEnabled() && target == NotificationTarget.EMAIL;
     }
 
     @Recover

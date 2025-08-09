@@ -6,6 +6,7 @@ import com.twilio.type.PhoneNumber;
 import com.waquarshamsi.api.telegram_notifer.dto.NotificationRequest;
 import com.waquarshamsi.api.telegram_notifer.exception.NotificationSendingException;
 import com.waquarshamsi.api.telegram_notifer.model.NotificationTarget;
+import com.waquarshamsi.api.telegram_notifer.service.FeatureFlagService;
 import com.waquarshamsi.api.telegram_notifer.service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +25,12 @@ public class SmsNotificationService implements NotificationService {
     private static final Logger log = LoggerFactory.getLogger(SmsNotificationService.class);
 
     private final String fromNumber;
+    private final FeatureFlagService featureFlagService;
 
-    public SmsNotificationService(@Value("${twilio.from-number}") String fromNumber) {
+    public SmsNotificationService(@Value("${twilio.from-number}") String fromNumber,
+                                  FeatureFlagService featureFlagService) {
         this.fromNumber = fromNumber;
+        this.featureFlagService = featureFlagService;
     }
 
     @Override
@@ -48,7 +52,7 @@ public class SmsNotificationService implements NotificationService {
 
     @Override
     public boolean supports(NotificationTarget target) {
-        return target == NotificationTarget.SMS;
+        return featureFlagService.isEmailNotificationEnabled() && target == NotificationTarget.SMS;
     }
 
     @Recover
