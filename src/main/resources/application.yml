@@ -1,20 +1,18 @@
 server:
   port: 8025
 spring:
-  profiles:
-    active: local #TODO: remove
   application:
     name: telegram-notifier
   rabbitmq:
-    host: localhost
+    host: ${RABBITMQ_HOST:localhost}
     port: 5672
-    username: guest
-    password: guest
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
   mail:
-    host: smtp.example.com
+    host: ${MAIL_HOST:smtp.example.com}
     port: 587
-    username: YOUR_SMTP_USERNAME
-    password: YOUR_SMTP_PASSWORD
+    username: ${SPRING_MAIL_USERNAME:YOUR_SMTP_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD:YOUR_SMTP_PASSWORD}
     properties:
       mail:
         smtp:
@@ -33,10 +31,10 @@ app:
     from: noreply@your-service.com
 telegram:
   bot:
-    token: YOUR_TELEGRAM_BOT_TOKEN
+    token: ${TELEGRAM_BOT_TOKEN:YOUR_TELEGRAM_BOT_TOKEN}
 twilio:
-  account-sid: ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-  auth-token: YOUR_TWILIO_AUTH_TOKEN
+  account-sid: ${TWILIO_ACCOUNT_SID:ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}
+  auth-token: ${TWILIO_AUTH_TOKEN:YOUR_TWILIO_AUTH_TOKEN}
   from-number: +15005550006 # A valid Twilio phone number you own
 feature-flags:
   sms:
@@ -56,7 +54,7 @@ info:
   contact:
     email: dev-team@example.com
 logstash:
-  host: localhost
+  host: ${LOGSTASH_HOST:localhost}
   port: 5000
 resilience4j:
   circuitbreaker:
@@ -73,8 +71,22 @@ resilience4j:
         <<: *cb_defaults # Use YAML anchors to avoid repetition
       telegram-service:
         <<: *cb_defaults
+features:
+  notification:
+    email:
+      enabled: false
+    sms:
+      enabled: false
+    telegram:
+      enabled: true
 logging:
   level:
     # Set to TRACE to see detailed method entry/exit logs from the LoggingAspect
     # Set to INFO or higher to disable them.
     com.waquarshamsi.api.telegram_notifer.aspect: TRACE
+
+
+# The Logstash appender is now disabled by default. 
+# To enable it, you need to activate the elk Spring profile. 
+# You can do this by setting the spring.profiles.active property 
+# to elk in your application.yml file or by setting an environment variable.

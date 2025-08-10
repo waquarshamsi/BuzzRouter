@@ -33,7 +33,7 @@ app:
     from: noreply@your-service.com
 telegram:
   bot:
-    token: xxxx
+    token: 7708842063:AAG1PxpU6_3igWrgYY5bKzHW2-9CaSO_-9w
 twilio:
   account-sid: ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
   auth-token: YOUR_TWILIO_AUTH_TOKEN
@@ -58,3 +58,12 @@ info:
 logstash:
   host: localhost
   port: 5000
+
+features:
+  notification:
+    email:
+      enabled: false
+    sms:
+      enabled: false
+    telegram:
+      enabled: true
